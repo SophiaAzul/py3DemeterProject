@@ -1,5 +1,11 @@
 import tkinter as tk
+from forex_python.converter import CurrencyRates
+from forex_python.converter import CurrencyCodes
 
+c = CurrencyRates()
+s = CurrencyCodes()
+# Create a list of currency options
+currency_options = ['USD', 'EUR', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY']
 
 class AFM:
     def __init__(self, master):
@@ -7,18 +13,27 @@ class AFM:
         self.master.title("Auto Forex Machine")
         self.master.geometry("500x400")
 
-        self.label1 = tk.Label(self.master, text="Welcome to AFM")
-        self.label1.pack()
+        self.label1 = tk.Label(self.master, text="Welcome to AFM", font=("Arial", 20))
+        self.label1.pack(pady=20)
 
-        self.label2 = tk.Label(self.master, text="Enter your PIN:")
+        self.label2 = tk.Label(self.master, text="Enter your PIN:", font=("Arial", 12))
         self.label2.pack()
 
         self.entry = tk.Entry(self.master, show="*")
-        self.entry.pack()
+        self.entry.pack(pady=10)
 
-        self.button = tk.Button(self.master, text="Enter", command=self.login)
-        self.button.pack()
+        self.button = tk.Button(self.master, text="Enter", command=self.login, font=("Arial", 12))
+        self.button.pack(pady=10)
 
+    def animate(self, label, colors):
+        current_color = label.cget("fg")
+        if current_color in colors:
+            next_index = (colors.index(current_color) + 1) % len(colors)
+            next_color = colors[next_index]
+        else:
+            next_color = colors[0]
+        label.config(fg=next_color)
+        label.after(500, self.animate, label, colors)
     def login(self):
         pin = self.entry.get()
 
@@ -71,6 +86,7 @@ class AFM:
 
         self.remit_button = tk.Button(self.master, text="Remittance", command=self.sell_remit)
         self.remit_button.pack()
+
     def buy_cash(self):
         self.label1.pack_forget()
         self.cash_button.pack_forget()
@@ -78,13 +94,20 @@ class AFM:
 
         self.input_label = tk.Label(self.master, text="Input currency:")
         self.input_label.pack()
-        self.IC_entry = tk.Entry(self.master, show="")
-        self.IC_entry.pack()
+
+        # Create StringVars to store the selected currencies
+        self.input_currency = tk.StringVar()
+        self.output_currency = tk.StringVar()
+
+        # Create the dropdown menus
+        self.input_currency_dropdown = tk.OptionMenu(self.master, self.input_currency, *currency_options)
+        self.input_currency_dropdown.pack()
 
         self.output_label = tk.Label(self.master, text="Output currency:")
         self.output_label.pack()
-        self.OC_entry = tk.Entry(self.master, show="")
-        self.OC_entry.pack()
+
+        self.output_currency_dropdown = tk.OptionMenu(self.master, self.output_currency, *currency_options)
+        self.output_currency_dropdown.pack()
 
         self.amount_label = tk.Label(self.master, text="Amount to be exchanged:")
         self.amount_label.pack()
@@ -101,13 +124,20 @@ class AFM:
 
         self.input_label = tk.Label(self.master, text="Input currency:")
         self.input_label.pack()
-        self.IC_entry = tk.Entry(self.master, show="")
-        self.IC_entry.pack()
+
+        # Create StringVars to store the selected currencies
+        self.input_currency = tk.StringVar()
+        self.output_currency = tk.StringVar()
+
+        # Create the dropdown menus
+        self.input_currency_dropdown = tk.OptionMenu(self.master, self.input_currency, *currency_options)
+        self.input_currency_dropdown.pack()
 
         self.output_label = tk.Label(self.master, text="Output currency:")
         self.output_label.pack()
-        self.OC_entry = tk.Entry(self.master, show="")
-        self.OC_entry.pack()
+
+        self.output_currency_dropdown = tk.OptionMenu(self.master, self.output_currency, *currency_options)
+        self.output_currency_dropdown.pack()
 
         self.amount_label = tk.Label(self.master, text="Amount to be exchanged:")
         self.amount_label.pack()
@@ -118,46 +148,53 @@ class AFM:
         self.confirm_button.pack()
 
     def cash_buy_in(self):
-
-        input_currency = self.IC_entry.get()
-        output_currency = self.OC_entry.get()
-        input_amount = float(self.amount_entry.get())
-        if input_currency.lower() == 'cny' and output_currency.lower() == 'usd':
-            self.IC_entry.pack_forget()
-            self.OC_entry.pack_forget()
+            self.input_currency_dropdown.pack_forget()
+            self.output_currency_dropdown.pack_forget()
             self.amount_entry.pack_forget()
             self.confirm_button.pack_forget()
-
-            output_amount = float(input_amount) * 6.8781
-            self.input_label.configure(text="The output amount is $" + str(output_amount))
-            self.output_label.configure(text="Please wait for your cash to be dispensed!")
-            self.amount_label.configure(text="Thank you for choosing The Bank of Computer Scientist!")
-            if self.label4.winfo_exists():
-                self.label4.pack_forget()
-
-        else:
-            self.label4 = tk.Label(self.master, text="Unknown currency!")
-            self.label4.pack()
-
+            input_currency = self.input_currency.get()
+            output_currency = self.output_currency.get()
+            input_amount = float(self.amount_entry.get())
+            if input_currency != output_currency:
+                rate = c.get_rate(input_currency, output_currency)
+                output_amount = float(input_amount) * rate * 0.98
+                rounded_output = round(output_amount, 2)
+                symbol = s.get_symbol(output_currency)
+                self.input_label.configure(text="The output amount is " + symbol + str(rounded_output))
+                self.output_label.configure(text="Please wait for your cash to be dispensed!")
+                self.amount_label.configure(text="Thank you for choosing The Bank of Computer Scientist!", fg="black")
+                self.animate(self.amount_label, ["black", "blue", "red", "green"])
+                if self.label4.winfo_exists():
+                    self.label4.pack_forget()
+                else:
+                    pass
+            else:
+                self.label4 = tk.Label(self.master, text="Please select different currencies!")
+                self.label4.pack()
     def remit_buy_in(self):
-        input_currency = self.IC_entry.get()
-        output_currency = self.OC_entry.get()
+        self.input_currency_dropdown.pack_forget()
+        self.output_currency_dropdown.pack_forget()
+        self.amount_entry.pack_forget()
+        self.confirm_button.pack_forget()
+        input_currency = self.input_currency.get()
+        output_currency = self.output_currency.get()
         input_amount = float(self.amount_entry.get())
-        if input_currency.lower() == 'cny' and output_currency.lower() == 'usd':
-            self.IC_entry.pack_forget()
-            self.OC_entry.pack_forget()
-            self.amount_entry.pack_forget()
-            self.confirm_button.pack_forget()
+        if input_currency != output_currency:
 
-            output_amount = float(input_amount) * 6.8781
-            self.input_label.configure(text="The output amount is $" + str(output_amount))
-            self.output_label.configure(text="It has already been deposited to your "+ output_currency.upper() + " account!")
+            rate = c.get_rate(input_currency, output_currency)
+            output_amount = float(input_amount) * rate * 0.99
+            rounded_output = round(output_amount, 2)
+            symbol = s.get_symbol(output_currency)
+            self.input_label.configure(text="The output amount is " + symbol + str(rounded_output))
+            self.output_label.configure(text="It has already been transferred to your "+ output_currency+" account!")
             self.amount_label.configure(text="Thank you for choosing The Bank of Computer Scientist!")
+            self.animate(self.amount_label, ["black", "blue", "red", "green"])
             if self.label4.winfo_exists():
                 self.label4.pack_forget()
-
+            else:
+                pass
         else:
-            self.label4 = tk.Label(self.master, text="Unknown currency!")
+            self.label4 = tk.Label(self.master, text="Please select different currencies!")
             self.label4.pack()
 
     def sell_cash(self):
@@ -167,13 +204,20 @@ class AFM:
 
         self.input_label = tk.Label(self.master, text="Input currency:")
         self.input_label.pack()
-        self.IC_entry = tk.Entry(self.master, show="")
-        self.IC_entry.pack()
+
+        # Create StringVars to store the selected currencies
+        self.input_currency = tk.StringVar()
+        self.output_currency = tk.StringVar()
+
+        # Create the dropdown menus
+        self.input_currency_dropdown = tk.OptionMenu(self.master, self.input_currency, *currency_options)
+        self.input_currency_dropdown.pack()
 
         self.output_label = tk.Label(self.master, text="Output currency:")
         self.output_label.pack()
-        self.OC_entry = tk.Entry(self.master, show="")
-        self.OC_entry.pack()
+
+        self.output_currency_dropdown = tk.OptionMenu(self.master, self.output_currency, *currency_options)
+        self.output_currency_dropdown.pack()
 
         self.amount_label = tk.Label(self.master, text="Amount to be exchanged:")
         self.amount_label.pack()
@@ -190,13 +234,20 @@ class AFM:
 
         self.input_label = tk.Label(self.master, text="Input currency:")
         self.input_label.pack()
-        self.IC_entry = tk.Entry(self.master, show="")
-        self.IC_entry.pack()
+
+        # Create StringVars to store the selected currencies
+        self.input_currency = tk.StringVar()
+        self.output_currency = tk.StringVar()
+
+        # Create the dropdown menus
+        self.input_currency_dropdown = tk.OptionMenu(self.master, self.input_currency, *currency_options)
+        self.input_currency_dropdown.pack()
 
         self.output_label = tk.Label(self.master, text="Output currency:")
         self.output_label.pack()
-        self.OC_entry = tk.Entry(self.master, show="")
-        self.OC_entry.pack()
+
+        self.output_currency_dropdown = tk.OptionMenu(self.master, self.output_currency, *currency_options)
+        self.output_currency_dropdown.pack()
 
         self.amount_label = tk.Label(self.master, text="Amount to be exchanged:")
         self.amount_label.pack()
@@ -208,50 +259,59 @@ class AFM:
 
     def cash_sell_out(self):
 
-        input_currency = self.IC_entry.get()
-        output_currency = self.OC_entry.get()
+        self.input_currency_dropdown.pack_forget()
+        self.output_currency_dropdown.pack_forget()
+        self.amount_entry.pack_forget()
+        self.confirm_button.pack_forget()
+        input_currency = self.input_currency.get()
+        output_currency = self.output_currency.get()
         input_amount = float(self.amount_entry.get())
-        if input_currency.lower() == 'cny' and output_currency.lower() == 'usd':
-            self.IC_entry.pack_forget()
-            self.OC_entry.pack_forget()
-            self.amount_entry.pack_forget()
-            self.confirm_button.pack_forget()
+        if input_currency != output_currency:
 
-            output_amount = float(input_amount) * 6.7934
-            self.input_label.configure(text="The output amount is $" + str(output_amount))
+            rate = c.get_rate(input_currency, output_currency)
+            output_amount = float(input_amount) * rate * 1.02
+            rounded_output = round(output_amount, 2)
+            symbol = s.get_symbol(output_currency)
+            self.input_label.configure(text="The output amount is " + symbol + str(rounded_output))
             self.output_label.configure(text="Please wait for your cash to be dispensed!")
             self.amount_label.configure(text="Thank you for choosing The Bank of Computer Scientist!")
+            self.animate(self.amount_label, ["black", "blue", "red", "green"])
             if self.label4.winfo_exists():
                 self.label4.pack_forget()
-
+            else:
+                pass
         else:
-            self.label4 = tk.Label(self.master, text="Unknown currency!")
+            self.label4 = tk.Label(self.master, text="Please select different currencies!")
             self.label4.pack()
 
     def remit_sell_out(self):
-        input_currency = self.IC_entry.get()
-        output_currency = self.OC_entry.get()
+        self.input_currency_dropdown.pack_forget()
+        self.output_currency_dropdown.pack_forget()
+        self.amount_entry.pack_forget()
+        self.confirm_button.pack_forget()
+        input_currency = self.input_currency.get()
+        output_currency = self.output_currency.get()
         input_amount = float(self.amount_entry.get())
-        if input_currency.lower() == 'cny' and output_currency.lower() == 'usd':
-            self.IC_entry.pack_forget()
-            self.OC_entry.pack_forget()
-            self.amount_entry.pack_forget()
-            self.confirm_button.pack_forget()
+        if input_currency != output_currency:
 
-            output_amount = float(input_amount) * 6.8491
-            self.input_label.configure(text="The output amount is $" + str(output_amount))
-            self.output_label.configure(text="It has already been deposited to your "+ output_currency.upper() + " account!")
+            rate = c.get_rate(input_currency, output_currency)
+            output_amount = float(input_amount) * rate * 1.01
+            rounded_output = round(output_amount, 2)
+            symbol = s.get_symbol(output_currency)
+            self.input_label.configure(text="The output amount is " + symbol + str(rounded_output))
+            self.output_label.configure(text="It has already been transferred to your " + output_currency + " account!")
             self.amount_label.configure(text="Thank you for choosing The Bank of Computer Scientist!")
+            self.animate(self.amount_label, ["black", "blue", "red", "green"])
             if self.label4.winfo_exists():
                 self.label4.pack_forget()
-
+            else:
+                pass
         else:
-            self.label4 = tk.Label(self.master, text="Unknown currency!")
+            self.label4 = tk.Label(self.master, text="Please select different currencies!")
             self.label4.pack()
     def logout(self):
         self.master.destroy()
-
-
+        
 root = tk.Tk()
 
 my_gui = AFM(root)
