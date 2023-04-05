@@ -13,7 +13,7 @@ class AFM:
         self.master.title("Auto Forex Machine")
         self.master.geometry("500x400")
 
-        self.label1 = tk.Label(self.master, text="Welcome to AFM", font=("Arial", 20))
+        self.label1 = tk.Label(self.master, text="Welcome to BCS", font=("Arial", 20))
         self.label1.pack(pady=20)
 
         self.label2 = tk.Label(self.master, text="Enter your PIN:", font=("Arial", 12))
@@ -24,6 +24,9 @@ class AFM:
 
         self.button = tk.Button(self.master, text="Enter", command=self.login, font=("Arial", 12))
         self.button.pack(pady=10)
+
+        self.label4 = tk.Label(self.master, text="")
+        self.label4.pack()
 
     def animate(self, label, colors):
         current_color = label.cget("fg")
@@ -39,8 +42,9 @@ class AFM:
 
         if pin == "1234":
             self.entry.pack_forget()
-            self.label1.configure(text="Login successful!")
+            self.label1.configure(text="Login successful!", fg="green")
             self.label2.configure(text="Good day computer scientist!")
+            self.animate(self.label2, ["black", "blue", "red", "green"])
             self.label3 = tk.Label(self.master, text="What would you like to do today?")
             self.label3.pack()
             self.button.pack_forget()
@@ -55,13 +59,14 @@ class AFM:
             self.logout_button.pack()
 
         else:
-            self.label1.configure(text="Invalid PIN, please try again.")
+            self.label1.configure(text="Invalid PIN, please try again.", fg="red")
 
     def show_buy_options(self):
         self.entry.pack_forget()
         self.label2.pack_forget()
         self.label3.pack_forget()
-        self.label1.configure(text="Cash or Remittance?")
+        self.label1.configure(text="Cash or Remittance?", fg="black")
+
         self.buy_button.pack_forget()
         self.sell_button.pack_forget()
         self.logout_button.pack_forget()
@@ -148,14 +153,15 @@ class AFM:
         self.confirm_button.pack()
 
     def cash_buy_in(self):
-            self.input_currency_dropdown.pack_forget()
-            self.output_currency_dropdown.pack_forget()
-            self.amount_entry.pack_forget()
-            self.confirm_button.pack_forget()
+
             input_currency = self.input_currency.get()
             output_currency = self.output_currency.get()
             input_amount = float(self.amount_entry.get())
             if input_currency != output_currency:
+                self.input_currency_dropdown.pack_forget()
+                self.output_currency_dropdown.pack_forget()
+                self.amount_entry.pack_forget()
+                self.confirm_button.pack_forget()
                 rate = c.get_rate(input_currency, output_currency)
                 output_amount = float(input_amount) * rate * 0.98
                 rounded_output = round(output_amount, 2)
@@ -166,20 +172,21 @@ class AFM:
                 self.animate(self.amount_label, ["black", "blue", "red", "green"])
                 if self.label4.winfo_exists():
                     self.label4.pack_forget()
-                else:
-                    pass
+
             else:
-                self.label4 = tk.Label(self.master, text="Please select different currencies!")
-                self.label4.pack()
+                self.label4.configure(text="Please select different currencies!",fg="red")
+
+
     def remit_buy_in(self):
-        self.input_currency_dropdown.pack_forget()
-        self.output_currency_dropdown.pack_forget()
-        self.amount_entry.pack_forget()
-        self.confirm_button.pack_forget()
+
         input_currency = self.input_currency.get()
         output_currency = self.output_currency.get()
         input_amount = float(self.amount_entry.get())
         if input_currency != output_currency:
+            self.input_currency_dropdown.pack_forget()
+            self.output_currency_dropdown.pack_forget()
+            self.amount_entry.pack_forget()
+            self.confirm_button.pack_forget()
 
             rate = c.get_rate(input_currency, output_currency)
             output_amount = float(input_amount) * rate * 0.99
@@ -194,7 +201,7 @@ class AFM:
             else:
                 pass
         else:
-            self.label4 = tk.Label(self.master, text="Please select different currencies!")
+            self.label4 = tk.Label(self.master, text="Please select different currencies!",fg="red")
             self.label4.pack()
 
     def sell_cash(self):
@@ -259,14 +266,15 @@ class AFM:
 
     def cash_sell_out(self):
 
-        self.input_currency_dropdown.pack_forget()
-        self.output_currency_dropdown.pack_forget()
-        self.amount_entry.pack_forget()
-        self.confirm_button.pack_forget()
+
         input_currency = self.input_currency.get()
         output_currency = self.output_currency.get()
         input_amount = float(self.amount_entry.get())
         if input_currency != output_currency:
+            self.input_currency_dropdown.pack_forget()
+            self.output_currency_dropdown.pack_forget()
+            self.amount_entry.pack_forget()
+            self.confirm_button.pack_forget()
 
             rate = c.get_rate(input_currency, output_currency)
             output_amount = float(input_amount) * rate * 1.02
@@ -281,18 +289,19 @@ class AFM:
             else:
                 pass
         else:
-            self.label4 = tk.Label(self.master, text="Please select different currencies!")
+            self.label4 = tk.Label(self.master, text="Please select different currencies!",fg="red")
             self.label4.pack()
 
     def remit_sell_out(self):
-        self.input_currency_dropdown.pack_forget()
-        self.output_currency_dropdown.pack_forget()
-        self.amount_entry.pack_forget()
-        self.confirm_button.pack_forget()
+
         input_currency = self.input_currency.get()
         output_currency = self.output_currency.get()
         input_amount = float(self.amount_entry.get())
         if input_currency != output_currency:
+            self.input_currency_dropdown.pack_forget()
+            self.output_currency_dropdown.pack_forget()
+            self.amount_entry.pack_forget()
+            self.confirm_button.pack_forget()
 
             rate = c.get_rate(input_currency, output_currency)
             output_amount = float(input_amount) * rate * 1.01
@@ -307,7 +316,7 @@ class AFM:
             else:
                 pass
         else:
-            self.label4 = tk.Label(self.master, text="Please select different currencies!")
+            self.label4 = tk.Label(self.master, text="Please select different currencies!",fg="red")
             self.label4.pack()
     def logout(self):
         self.master.destroy()
